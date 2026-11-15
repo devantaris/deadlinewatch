@@ -116,13 +116,21 @@ class GmailError(RuntimeError):
 
 
 class GmailClient:
-    def __init__(self, user: str, app_password: str, host: str = "imap.gmail.com", port: int = 993):
+    def __init__(
+        self,
+        user: str,
+        app_password: str,
+        host: str = "imap.gmail.com",
+        port: int = 993,
+        log=print,
+    ):
         if not user or not app_password:
             raise GmailError("GMAIL_USER and GMAIL_APP_PASSWORD must be set in .env")
         self.user = user
         self.password = app_password
         self.host = host
         self.port = port
+        self.log = log
         self.conn: imaplib.IMAP4_SSL | None = None
 
     def __enter__(self) -> "GmailClient":
@@ -189,12 +197,31 @@ class GmailClient:
         looks at the newest `seed_limit` messages so we do not bill you for
         your whole inbox.
         """
+        try:
+            return self._fetch_new(since_uid, max_emails, seed_limit, folder)
+        except (OSError, imaplib.IMAP4.abort) as exc:
+            # Gmail closes idle connections. Drop the dead socket, reconnect
+            # and try once more instead of failing the whole cycle.
+            self.log(f"IMAP connection dropped ({exc.__class__.__name__}) - reconnecting")
+            self.close()
+            self.connect()
+            return self._fetch_new(since_uid, max_emails, seed_limit, folder)
+
+    def _fetch_new(
+        self,
+        since_uid: int,
+        max_emails: int = 100,
+        seed_limit: int = 25,
+        folder: str = "INBOX",
+    ) -> list[dict]:
         if self.conn is None:
             self.connect()
         assert self.conn is not None
 
         try:
             self.conn.select(folder)
+        except imaplib.IMAP4.abort:
+            raise  # a dropped socket - the caller reconnects
         except imaplib.IMAP4.error as exc:
             raise GmailError(f"cannot open mailbox '{folder}': {exc}") from exc
 

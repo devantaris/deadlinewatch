@@ -220,7 +220,13 @@ def cmd_test_telegram(_args) -> int:
 
 def _build(settings):
     store = Store(settings.db_path)
-    gmail = GmailClient(settings.gmail_user, settings.gmail_app_password, settings.imap_host, settings.imap_port)
+    gmail = GmailClient(
+        settings.gmail_user,
+        settings.gmail_app_password,
+        settings.imap_host,
+        settings.imap_port,
+        log=log,
+    )
     llm = LLMClient(
         settings.llm_api_key,
         settings.llm_base_url,
