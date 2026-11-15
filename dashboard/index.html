@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>DeadlineWatch</title>
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+  <header>
+    <div class="head-left">
+      <h1>DeadlineWatch</h1>
+      <p class="sub" id="subtitle">loading&hellip;</p>
+    </div>
+    <div class="head-right">
+      <div class="stat"><span id="stat-open">0</span><label>open</label></div>
+      <div class="stat"><span id="stat-overdue">0</span><label>overdue</label></div>
+      <div class="stat"><span id="stat-emails">0</span><label>emails</label></div>
+      <div class="stat"><span id="stat-done">0</span><label>done</label></div>
+    </div>
+  </header>
+
+  <main id="board"></main>
+
+  <footer>
+    <span id="updated"></span>
+    <span class="hint">runs locally &middot; <a href="https://core.telegram.org/bots#how-do-i-create-my-first-bot" target="_blank" rel="noreferrer">manage via Telegram</a></span>
+  </footer>
+
+  <script src="/app.js"></script>
+</body>
+</html>
